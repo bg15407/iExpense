@@ -8,33 +8,50 @@
 import SwiftUI
 
 
+//Storing data in User Defaults
 struct ContentView: View{
-    @State private var numbers = [Int]()
-    @State private var currentNumber = 1
+    @State private var count = UserDefaults.standard.integer(forKey: "CountKey")
     
     var body: some View{
-        NavigationView {
-            VStack{
-                List{
-                    ForEach(numbers, id: \.self){
-                        Text("\($0)")
-                    }
-                    .onDelete(perform: removeItem)
-                }
-                
-                Button("Add Number"){
-                    numbers.append(self.currentNumber)
-                    currentNumber += 1
-                }
+        VStack{
+            Text("Count is now \(count)")
+            
+            Button("Count up"){
+                count += 1
+                UserDefaults.standard.set(count, forKey: "CountKey")
             }
-            .navigationBarItems(leading: EditButton())
         }
     }
-    
-    func removeItem(at offsets: IndexSet){
-        numbers.remove(atOffsets: offsets)
-    }
 }
+
+//Deleting an item from a list
+//struct ContentView: View{
+//    @State private var numbers = [Int]()
+//    @State private var currentNumber = 1
+//
+//    var body: some View{
+//        NavigationView {
+//            VStack{
+//                List{
+//                    ForEach(numbers, id: \.self){
+//                        Text("\($0)")
+//                    }
+//                    .onDelete(perform: removeItem)
+//                }
+//
+//                Button("Add Number"){
+//                    numbers.append(self.currentNumber)
+//                    currentNumber += 1
+//                }
+//            }
+//            .navigationBarItems(leading: EditButton())
+//        }
+//    }
+//
+//    func removeItem(at offsets: IndexSet){
+//        numbers.remove(atOffsets: offsets)
+//    }
+//}
 
 
 //Using @Environment to access presentation mode & dismiss()
