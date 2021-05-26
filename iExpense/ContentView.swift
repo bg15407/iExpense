@@ -7,22 +7,44 @@
 
 import SwiftUI
 
+//Storing Complex Data in User Defaults using Codable
+struct User: Codable{
+    var firstName: String
+    var lastName: String
+}
 
-//Storing data in User Defaults
 struct ContentView: View{
-    @State private var count = UserDefaults.standard.integer(forKey: "CountKey")
+    @State private var user = User(firstName: "Gayan", lastName: "Kalinga")
     
     var body: some View{
-        VStack{
-            Text("Count is now \(count)")
+        VStack {
+            Text("\(user.firstName) \(user.lastName)")
             
-            Button("Count up"){
-                count += 1
-                UserDefaults.standard.set(count, forKey: "CountKey")
+            Button("Save User"){
+                let encoder = JSONEncoder()
+                
+                if let data = try? encoder.encode(user){
+                    UserDefaults.standard.set(data, forKey: "UserData")
+                }
             }
         }
     }
 }
+//Storing Simple data in User Defaults
+//struct ContentView: View{
+//    @State private var count = UserDefaults.standard.integer(forKey: "CountKey")
+//
+//    var body: some View{
+//        VStack{
+//            Text("Count is now \(count)")
+//
+//            Button("Count up"){
+//                count += 1
+//                UserDefaults.standard.set(count, forKey: "CountKey")
+//            }
+//        }
+//    }
+//}
 
 //Deleting an item from a list
 //struct ContentView: View{
