@@ -7,29 +7,108 @@
 
 import SwiftUI
 
-//Storing Complex Data in User Defaults using Codable
-struct User: Codable{
-    var firstName: String
-    var lastName: String
+//iExpense App
+struct ExpenseItem: Identifiable, Codable{
+    var id = UUID()
+    var name: String
+    var type: String
+    var amount: Int
 }
 
-struct ContentView: View{
-    @State private var user = User(firstName: "Gayan", lastName: "Kalinga")
-    
-    var body: some View{
-        VStack {
-            Text("\(user.firstName) \(user.lastName)")
-            
-            Button("Save User"){
-                let encoder = JSONEncoder()
-                
-                if let data = try? encoder.encode(user){
-                    UserDefaults.standard.set(data, forKey: "UserData")
-                }
+class Expenses: ObservableObject{
+    @Published var items = [ExpenseItem](){
+        //Saving Data
+        didSet{
+            let encoder = JSONEncoder()
+            if let encodedData = try? encoder.encode(items){
+                UserDefaults.standard.set(encodedData, forKey: "SavedExpenseItem")
             }
         }
     }
+    
+    //Loading Saved Data
+    init(){
+        if let items = UserDefaults.standard.data(forKey: "SavedExpenseItem"){
+            let decoder = JSONDecoder()
+            
+            if let decodedData = try? decoder.decode([ExpenseItem].self, from: items){
+                self.items = decodedData
+                return
+            }
+        }
+        items = []
+    }
 }
+
+struct ContentView: View{
+    @ObservedObject var expenses = Expenses()
+    @State private var showingAddExpenseView = false
+    
+    var body: some View{
+        NavigationView{
+            VStack{
+                List{
+                    ForEach(expenses.items){ item in
+                        HStack{
+                            Text("\(item.name)")
+                            Spacer()
+                            VStack{
+                                Text("\(item.type)")
+                                Text("$\(item.amount)")
+                            }
+                        }
+                    }
+                    .onDelete(perform: removeItem)
+                }
+            }
+            .navigationTitle("iExpenses")
+            .navigationBarItems(leading: EditButton()
+                ,trailing:
+                Button(action: {
+                    showingAddExpenseView.toggle()
+                }) {
+                    Image(systemName: "plus")
+                }
+                .sheet(isPresented: $showingAddExpenseView){
+                    AddExpenseView(expenses: self.expenses)
+                }
+)
+        }
+    }
+    
+    func removeItem(at offsets: IndexSet){
+        expenses.items.remove(atOffsets: offsets)
+    }
+}
+
+
+
+//-----//
+//Theory
+//Storing Complex Data in User Defaults using Codable
+//struct User: Codable{
+//    var firstName: String
+//    var lastName: String
+//}
+//
+//struct ContentView: View{
+//    @State private var user = User(firstName: "Gayan", lastName: "Kalinga")
+//
+//    var body: some View{
+//        VStack {
+//            Text("\(user.firstName) \(user.lastName)")
+//
+//            Button("Save User"){
+//                let encoder = JSONEncoder()
+//
+//                if let data = try? encoder.encode(user){
+//                    UserDefaults.standard.set(data, forKey: "UserData")
+//                }
+//            }
+//        }
+//    }
+//}
+
 //Storing Simple data in User Defaults
 //struct ContentView: View{
 //    @State private var count = UserDefaults.standard.integer(forKey: "CountKey")
